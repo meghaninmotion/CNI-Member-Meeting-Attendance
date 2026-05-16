@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNI Meeting Attendance 2018–2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --spring: #1D9E75;
+    --spring-light: rgba(29,158,117,0.18);
+    --spring-mid: rgba(29,158,117,0.55);
+    --fall: #534AB7;
+    --fall-light: rgba(83,74,183,0.18);
+    --fall-mid: rgba(83,74,183,0.55);
+    --ink: #1a1a2e;
+    --ink-mid: #4a4a6a;
+    --ink-light: #9090aa;
+    --rule: rgba(90,90,130,0.12);
+    --bg: #f7f7fc;
+    --card: #ffffff;
+    --covid: rgba(180,178,200,0.10);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 640px;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+
+  header p {
+    font-size: 14px;
+    color: var(--ink-mid);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .legend {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-mid);
+    font-weight: 400;
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-size {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-light);
+    border-left: 1px solid var(--rule);
+    padding-left: 28px;
+  }
+
+  .size-demo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .size-circle {
+    border-radius: 50%;
+    background: rgba(120,120,160,0.25);
+    border: 1px solid rgba(120,120,160,0.4);
+    flex-shrink: 0;
+  }
+
+  .chart-container {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid rgba(90,90,130,0.1);
+    padding: 32px 32px 24px;
+    width: 100%;
+    max-width: 860px;
+    position: relative;
+  }
+
+  svg { display: block; width: 100%; overflow: visible; }
+
+  .tooltip {
+    position: absolute;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(26,26,46,0.18);
+  }
+
+  .tooltip .t-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .tooltip .t-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-weight: 300;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .tooltip .t-val {
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .axis-label {
+    font-family: 'DM Sans', sans-serif;
+    fill: var(--ink-light);
+    font-size: 11px;
+  }
+
+  .axis-title {
+    font-family: 'DM Sans', sans-serif;
+    fill: var(--ink-mid);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .year-label {
+    font-family: 'DM Serif Display', serif;
+    fill: rgba(90,90,130,0.2);
+    font-size: 22px;
+  }
+
+  .covid-label {
+    font-family: 'DM Sans', sans-serif;
+    fill: rgba(120,120,160,0.45);
+    font-size: 11px;
+    font-style: italic;
+  }
+
+  footer {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--ink-light);
+    text-align: center;
+    line-height: 1.8;
+    max-width: 640px;
+  }
+
+  .bubble {
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .bubble:hover { opacity: 1 !important; }
+  .bubble.dimmed { opacity: 0.2; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CNI Meeting Attendance &amp; Member Representation</h1>
+  <p>Each bubble is one meeting. Position shows when it occurred and what share of member organizations were represented. Size reflects total attendance.</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <span class="legend-dot" style="background:var(--spring);"></span>
+    Spring meeting
+  </div>
+  <div class="legend-item">
+    <span class="legend-dot" style="background:var(--fall);"></span>
+    Fall meeting
+  </div>
+  <div class="legend-size">
+    <span>Bubble size = attendees</span>
+    <div class="size-demo">
+      <div class="size-circle" style="width:16px;height:16px;"></div>
+      <span>150</span>
+    </div>
+    <div class="size-demo">
+      <div class="size-circle" style="width:28px;height:28px;"></div>
+      <span>490</span>
+    </div>
+  </div>
+</div>
+
+<div class="chart-container" id="chartWrap">
+  <svg id="chart" role="img" aria-label="Bubble chart of CNI meeting attendance 2018 to 2026. X axis is time, Y axis is percent of members represented, bubble size encodes total attendees."></svg>
+  <div class="tooltip" id="tooltip"></div>
+</div>
+
+<footer>
+  Spring 2020, Fall 2020, and Spring 2021 meetings were cancelled &nbsp;·&nbsp; Hover bubbles to explore
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const meetings = [
+  { label:'Spring 2018', date:new Date(2018,3,1),  season:'spring', att:374, pct:69.23, memberOrgs:171, totalMembers:247 },
+  { label:'Fall 2018',   date:new Date(2018,11,1), season:'fall',   att:485, pct:80.88, memberOrgs:203, totalMembers:251 },
+  { label:'Spring 2019', date:new Date(2019,3,1),  season:'spring', att:381, pct:70.92, memberOrgs:178, totalMembers:251 },
+  { label:'Fall 2019',   date:new Date(2019,11,1), season:'fall',   att:489, pct:80.95, memberOrgs:204, totalMembers:252 },
+  { label:'Fall 2021',   date:new Date(2021,11,1), season:'fall',   att:179, pct:41.81, memberOrgs:97,  totalMembers:232 },
+  { label:'Spring 2022', date:new Date(2022,3,1),  season:'spring', att:149, pct:38.0,  memberOrgs:87,  totalMembers:229 },
+  { label:'Fall 2022',   date:new Date(2022,11,1), season:'fall',   att:353, pct:72.81, memberOrgs:166, totalMembers:228 },
+  { label:'Spring 2023', date:new Date(2023,3,1),  season:'spring', att:271, pct:58.7,  memberOrgs:137, totalMembers:233 },
+  { label:'Fall 2023',   date:new Date(2023,11,1), season:'fall',   att:374, pct:75.1,  memberOrgs:175, totalMembers:233 },
+  { label:'Spring 2024', date:new Date(2024,3,1),  season:'spring', att:255, pct:55.93, memberOrgs:132, totalMembers:236 },
+  { label:'Fall 2024',   date:new Date(2024,11,1), season:'fall',   att:408, pct:81.0,  memberOrgs:192, totalMembers:237 },
+  { label:'Spring 2025', date:new Date(2025,3,1),  season:'spring', att:247, pct:54.6,  memberOrgs:130, totalMembers:238 },
+  { label:'Fall 2025',   date:new Date(2025,11,1), season:'fall',   att:382, pct:75.0,  memberOrgs:172, totalMembers:229 },
+  { label:'Spring 2026', date:new Date(2026,3,1),  season:'spring', att:288, pct:61.6,  memberOrgs:141, totalMembers:229 },
+];
+
+const W = 780, H = 380;
+const m = { top: 20, right: 40, bottom: 52, left: 56 };
+const iw = W - m.left - m.right;
+const ih = H - m.top - m.bottom;
+
+const svg = d3.select('#chart')
+  .attr('viewBox', `0 0 ${W} ${H}`);
+
+const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+
+const xScale = d3.scaleTime()
+  .domain([new Date(2017,6,1), new Date(2027,0,1)])
+  .range([0, iw]);
+
+const yScale = d3.scaleLinear()
+  .domain([30, 88])
+  .range([ih, 0]);
+
+const maxAtt = d3.max(meetings, d => d.att);
+const rScale = d3.scaleSqrt().domain([0, maxAtt]).range([0, 34]);
+
+function bubbleFill(d) {
+  return d.season === 'spring'
+    ? 'rgba(29,158,117,0.52)'
+    : 'rgba(83,74,183,0.52)';
+}
+function bubbleStroke(d) {
+  return d.season === 'spring' ? '#1D9E75' : '#534AB7';
+}
+
+const covidX1 = xScale(new Date(2020,0,1));
+const covidX2 = xScale(new Date(2022,0,1));
+
+g.append('rect')
+  .attr('x', covidX1).attr('y', 0)
+  .attr('width', covidX2 - covidX1)
+  .attr('height', ih)
+  .attr('fill', 'rgba(180,178,200,0.08)')
+  .attr('stroke', 'none');
+
+g.append('line')
+  .attr('x1', covidX1).attr('x2', covidX1)
+  .attr('y1', 0).attr('y2', ih)
+  .attr('stroke', 'rgba(150,148,180,0.2)')
+  .attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3 3');
+
+g.append('line')
+  .attr('x1', covidX2).attr('x2', covidX2)
+  .attr('y1', 0).attr('y2', ih)
+  .attr('stroke', 'rgba(150,148,180,0.2)')
+  .attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3 3');
+
+g.append('text')
+  .attr('class', 'covid-label')
+  .attr('x', (covidX1 + covidX2) / 2)
+  .attr('y', 16)
+  .attr('text-anchor', 'middle')
+  .text('COVID gap');
+
+const gridY = [40, 50, 60, 70, 80];
+g.selectAll('.grid-y').data(gridY).join('line')
+  .attr('x1', 0).attr('x2', iw)
+  .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
+  .attr('stroke', 'rgba(90,90,130,0.1)')
+  .attr('stroke-width', 1);
+
+const years = [2018,2019,2020,2021,2022,2023,2024,2025,2026];
+g.selectAll('.year-bg').data(years).join('text')
+  .attr('class', 'year-label')
+  .attr('x', y => xScale(new Date(y, 6, 1)))
+  .attr('y', ih - 8)
+  .attr('text-anchor', 'middle')
+  .text(y => y);
+
+const xAxis = d3.axisBottom(xScale)
+  .ticks(d3.timeYear.every(1))
+  .tickFormat(d3.timeFormat('%Y'))
+  .tickSize(4);
+
+const yAxis = d3.axisLeft(yScale)
+  .tickValues(gridY)
+  .tickFormat(d => d + '%')
+  .tickSize(4);
+
+g.append('g')
+  .attr('transform', `translate(0,${ih})`)
+  .call(xAxis)
+  .call(ax => ax.select('.domain').attr('stroke','rgba(90,90,130,0.2)'))
+  .call(ax => ax.selectAll('line').attr('stroke','rgba(90,90,130,0.2)'))
+  .call(ax => ax.selectAll('text')
+    .attr('class','axis-label')
+    .attr('dy', '1.2em'));
+
+g.append('g').call(yAxis)
+  .call(ax => ax.select('.domain').attr('stroke','rgba(90,90,130,0.2)'))
+  .call(ax => ax.selectAll('line').attr('stroke','rgba(90,90,130,0.2)'))
+  .call(ax => ax.selectAll('text').attr('class','axis-label').attr('dx','-4'));
+
+g.append('text')
+  .attr('class','axis-title')
+  .attr('x', iw / 2)
+  .attr('y', ih + 44)
+  .attr('text-anchor','middle')
+  .text('Year');
+
+g.append('text')
+  .attr('class','axis-title')
+  .attr('transform',`translate(-44,${ih/2}) rotate(-90)`)
+  .attr('text-anchor','middle')
+  .text('% of member organizations represented');
+
+const tooltip = document.getElementById('tooltip');
+const wrap = document.getElementById('chartWrap');
+
+const bubbles = g.selectAll('.bubble')
+  .data(meetings)
+  .join('circle')
+  .attr('class', 'bubble')
+  .attr('cx', d => xScale(d.date))
+  .attr('cy', d => yScale(d.pct))
+  .attr('r', d => rScale(d.att))
+  .attr('fill', d => bubbleFill(d))
+  .attr('stroke', d => bubbleStroke(d))
+  .attr('stroke-width', 1.5)
+  .on('mouseover', function(event, d) {
+    bubbles.classed('dimmed', n => n !== d);
+    d3.select(this).attr('stroke-width', 2.5);
+
+    tooltip.innerHTML = `
+      <div class="t-label" style="color:${bubbleStroke(d)}">${d.label}</div>
+      <div class="t-row"><span>Total attendees</span><span class="t-val">${d.att}</span></div>
+      <div class="t-row"><span>Member orgs represented</span><span class="t-val">${d.memberOrgs} of ${d.totalMembers}</span></div>
+      <div class="t-row"><span>Share of membership</span><span class="t-val">${d.pct.toFixed(1)}%</span></div>
+    `;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const svgEl = document.getElementById('chart');
+    const svgRect = svgEl.getBoundingClientRect();
+    const scaleX = svgRect.width / W;
+    const scaleY = svgRect.height / H;
+    const cx = (xScale(d.date) + m.left) * scaleX;
+    const cy = (yScale(d.pct) + m.top) * scaleY;
+    const r  = rScale(d.att) * scaleX;
+
+    tooltip.style.display = 'block';
+    let tx = cx + r + 12;
+    let ty = cy - 60;
+    const tipW = tooltip.offsetWidth;
+    if (tx + tipW > wrapRect.width - 16) tx = cx - r - tipW - 12;
+    if (ty < 8) ty = 8;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top  = ty + 'px';
+  })
+  .on('mouseout', function() {
+    bubbles.classed('dimmed', false);
+    d3.select(this).attr('stroke-width', 1.5);
+    tooltip.style.display = 'none';
+  });
+
+bubbles
+  .attr('r', 0)
+  .transition()
+  .duration(600)
+  .delay((d, i) => i * 55)
+  .ease(d3.easeCubicOut)
+  .attr('r', d => rScale(d.att));
+</script>
+</body>
+</html>
